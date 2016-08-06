@@ -17,13 +17,13 @@ void mf_anticollision(nfc_device_desc_t *device, mftag *t, mfreader *r, void (*U
 void mf_configure(nfc_device_t* pdi);
 int mf_enhanced_auth(int e_sector, int a_sector, mftag t, mfreader r, denonce *d, pKeys *pk, char mode, bool dumpKeysA, void (*UpdateStatusMessage)(char *status));
 void mf_init(nfc_device_desc_t *device, mftag *t, mfreader *r, void (*UpdateStatusMessage)(char *status));
-void mf_select_tag(nfc_device_t* pdi, nfc_target_info_t* ti, void (*UpdateStatusMessage)(char *status));
+void mf_select_tag(nfc_device_t* pdi, nfc_target_t* ti, void (*UpdateStatusMessage)(char *status));
 int trailer_block(uint32_t block);
 void reset(nfc_device_desc_t *device, mftag *t, mfreader *r, void (*UpdateStatusMessage)(char *status));
 int find_exploit_sector(mftag t, void (*UpdateStatusMessage)(char *status));
 void num_to_bytes(uint64_t n, uint32_t len, byte_t* dest);
 countKeys * uniqsort(uint64_t * possibleKeys, uint32_t size, void (*UpdateStatusMessage)(char *status));
-void readSector(nfc_device_desc_t *device,nfc_device_t * pnd, mifare_sector* sector,nfc_target_info_t *t, bool onlyA, mftag *a, mfreader *r, void (*UpdateStatusMessage)(char *status));
+void readSector(nfc_device_desc_t *device,nfc_device_t * pnd, mifare_sector* sector,nfc_target_t *t, bool onlyA, mftag *a, mfreader *r, void (*UpdateStatusMessage)(char *status));
 uint8_t sectorToFirstBlock(uint8_t sector);
 unsigned int numberOfBlocks(uint8_t sector);
 bool read_mifare_ul_card (nfc_device_t *pnd, mifareul_tag *mtDump, void (*UpdateStatusMessage)(char *status));
@@ -86,12 +86,13 @@ uint8_t sectorToFirstBlock(uint8_t sector) {
  * @param a The tag anticollision info
  * @param r The reader handle
  */
-void readSector(nfc_device_desc_t *device, nfc_device_t * pnd, mifare_sector* sector,nfc_target_info_t *t, bool onlyA, mftag *a, mfreader *r, void (*UpdateStatusMessage)(char *status)) {
+void readSector(nfc_device_desc_t *device, nfc_device_t * pnd, mifare_sector* sector, nfc_target_t *t, bool onlyA, mftag *a, mfreader *r, void (*UpdateStatusMessage)(char *status)) {
 	static mifare_param mp;
+	const nfc_modulation_t nm = {NMT_ISO14443A,NBR_106};
 	char Buffer[150];
 	uint8_t block = sectorToFirstBlock(sector->sector)+numberOfBlocks(sector->sector) - 1;
 	memcpy(mp.mpa.abtKey,sector->KeyA, sizeof(sector->KeyA));
-	memcpy(mp.mpa.abtUid,t->nai.abtUid,4);
+	memcpy(mp.mpa.abtUid, t->nti.nai.abtUid,4);
 	if (nfc_initiator_mifare_cmd(pnd, MC_AUTH_A, block, &mp)) {
 		int i;
 		for (i=numberOfBlocks(sector->sector)-1; i>=0; i--) {
@@ -101,7 +102,7 @@ void readSector(nfc_device_desc_t *device, nfc_device_t * pnd, mifare_sector* se
 				memcpy(sector->Data[i],mp.mpd.abtData,16);
 			} else {
 				mf_configure(pnd);
-				nfc_initiator_select_passive_target(pnd, NM_ISO14443A_106, NULL, 0, t);
+				nfc_initiator_select_passive_target(pnd, nm, NULL, 0, t);
 				sprintf(Buffer, "Error Reading: Block %02d, type %c, key %012llx", block, 'A', bytes_to_num(sector->KeyA, 6));
 				UpdateStatusMessage(Buffer);
 				break;
@@ -113,7 +114,7 @@ void readSector(nfc_device_desc_t *device, nfc_device_t * pnd, mifare_sector* se
 		mf_anticollision(device, a, r, UpdateStatusMessage);
 		if (stopreadingcard) return;
 		memcpy(mp.mpa.abtKey,sector->KeyB, sizeof(sector->KeyB));
-		memcpy(mp.mpa.abtUid,t->nai.abtUid,4);
+		memcpy(mp.mpa.abtUid, t->nti.nai.abtUid,4);
 		if (nfc_initiator_mifare_cmd(pnd, MC_AUTH_B, block, &mp)) {
 			int i;
 			for (i=numberOfBlocks(sector->sector)-1;i>=0;i--) {
@@ -123,7 +124,7 @@ void readSector(nfc_device_desc_t *device, nfc_device_t * pnd, mifare_sector* se
 					memcpy(sector->Data[i],mp.mpd.abtData,16);
 				} else {
 					mf_configure(pnd);
-					nfc_initiator_select_passive_target(pnd, NM_ISO14443A_106, NULL, 0, t);
+					nfc_initiator_select_passive_target(pnd, nm, NULL, 0, t);
 					sprintf(Buffer, "Error Reading: Block %02d, type %c, key %012llx", block, 'B', bytes_to_num(sector->KeyB, 6));
 					UpdateStatusMessage(Buffer);
 					break;
@@ -134,7 +135,7 @@ void readSector(nfc_device_desc_t *device, nfc_device_t * pnd, mifare_sector* se
 			sprintf(Buffer, "Error Reading: Block %02d, type %c, key %012llx :", block, 'B', bytes_to_num(sector->KeyB, 6));
 			UpdateStatusMessage(Buffer);
 			mf_configure(pnd);
-			nfc_initiator_select_passive_target(pnd, NM_ISO14443A_106, NULL, 0, t);
+			nfc_initiator_select_passive_target(pnd, nm, NULL, 0, t);
 		}
 	}
 }
@@ -247,7 +248,7 @@ int mf_enhanced_auth(int e_sector, int a_sector, mftag t, mfreader r, denonce *d
 	
 	// Prepare AUTH command
 	Auth[0] = (t.sectors[e_sector].foundKeyA) ? 0x60 : 0x61;
-	append_iso14443a_crc(Auth,2);
+	iso14443a_crc_append(Auth,2);
 	
 	// We need full control over the CRC
 	if (!nfc_configure(r.pdi, NDO_HANDLE_CRC, false))  {
@@ -264,7 +265,7 @@ int mf_enhanced_auth(int e_sector, int a_sector, mftag t, mfreader r, denonce *d
 		return 0;
 	}
 
-	if (!nfc_initiator_transceive_bytes(r.pdi, Auth, 4, Rx, &RxLen)) {
+	if (!nfc_initiator_transceive_bytes(r.pdi, Auth, 4, Rx, &RxLen,0)) {
 		UpdateStatusMessage("Error while requesting plain tag-nonce.");
 		stopreadingcard = TRUE;
 		return 0;
@@ -328,7 +329,7 @@ int mf_enhanced_auth(int e_sector, int a_sector, mftag t, mfreader r, denonce *d
 		// Again, prepare the Auth command with MC_AUTH_A, recover the block and CRC
 		Auth[0] = dumpKeysA ? 0x60 : 0x61;
 		Auth[1] = a_sector; 
-		append_iso14443a_crc(Auth,2);
+		iso14443a_crc_append(Auth,2);
 		
 		// Encryption of the Auth command, sending the Auth command
 		for (i = 0; i < 4; i++) {
@@ -533,7 +534,8 @@ void reset(nfc_device_desc_t *device, mftag *t, mfreader *r, void (*UpdateStatus
  * @param r Handle to the reader
  */
 void mf_anticollision(nfc_device_desc_t *device, mftag *t, mfreader *r, void (*UpdateStatusMessage)(char *status)) {
-	if (!nfc_initiator_select_passive_target(r->pdi, NM_ISO14443A_106, NULL, 0, &t->ti))
+	const nfc_modulation_t nm = { NMT_ISO14443A,NBR_106 };
+	if (!nfc_initiator_select_passive_target(r->pdi, nm, NULL, 0, &t->ti))
 		reset(device, t, r, UpdateStatusMessage);
 }
 
@@ -566,9 +568,10 @@ long long unsigned int bytes_to_num(byte_t* src, uint32_t len) {
  * @param ti Information about the card
  * @param UpdateStatusMessage a message for the user
  */
-void mf_select_tag(nfc_device_t* pdi, nfc_target_info_t* ti, void (*UpdateStatusMessage)(char *status)) {
+void mf_select_tag(nfc_device_t* pdi, nfc_target_t* ti, void (*UpdateStatusMessage)(char *status)) {
 	// Poll for a ISO14443A (MIFARE) tag
-	if (!nfc_initiator_select_passive_target(pdi,NM_ISO14443A_106,NULL,0,ti)) {
+	const nfc_modulation_t nm = { NMT_ISO14443A,NBR_106 };
+	if (!nfc_initiator_select_passive_target(pdi, nm,NULL,0,ti)) {
 		UpdateStatusMessage("Status: !Error connecting to the MIFARE Classic tag.");
 		nfc_disconnect(pdi);
 		stopreadingcard = TRUE;
@@ -781,11 +784,10 @@ int ReadCard(nfc_device_desc_t *device, std::list<performance> *performanceData,
 	mf_select_tag(r.pdi, &t.ti, UpdateStatusMessage);
 	if (stopreadingcard) { return 0;	}
 	//Check if it's a mifare classic tag
-	if (0 != (t.ti.nai.btSak & 0x08)) {
-
+	if (0 != (t.ti.nti.nai.btSak & 0x08)) {
 		// Save tag uid and info about block size (b4K)
-		t.b4K = (t.ti.nai.abtAtqa[1] == 0x02);
-		t.uid = (uint32_t) bytes_to_num(t.ti.nai.abtUid, 4);
+		t.b4K = (t.ti.nti.nai.abtAtqa[1] == 0x02);
+		t.uid = (uint32_t) bytes_to_num(t.ti.nti.nai.abtUid, 4);
 
 		t.num_blocks = (t.b4K) ? 0xff : 0x3f;
 		t.num_sectors = t.b4K ? NR_TRAILERS_4k : NR_TRAILERS_1k;
@@ -883,7 +885,7 @@ int ReadCard(nfc_device_desc_t *device, std::list<performance> *performanceData,
 
 			// Try to authenticate to all sectors with default keys
 			// Set the authentication information (uid)
-			memcpy(mp.mpa.abtUid, t.ti.nai.abtUid, sizeof(mp.mpa.abtUid));
+			memcpy(mp.mpa.abtUid, t.ti.nti.nai.abtUid, sizeof(mp.mpa.abtUid));
 			// Iterate over all keys (n = number of keys)
 			n = sizeof(defaultKeys)/sizeof(defaultKeys[0]);
 		
@@ -965,7 +967,7 @@ int ReadCard(nfc_device_desc_t *device, std::list<performance> *performanceData,
 				for (j = 0; j < (t.num_sectors); ++j) {
 					performance pSector;
 					pSector.duration = GetTickCount();
-					memcpy(mp.mpa.abtUid, t.ti.nai.abtUid, sizeof(mp.mpa.abtUid));
+					memcpy(mp.mpa.abtUid, t.ti.nti.nai.abtUid, sizeof(mp.mpa.abtUid));
 					if ((dumpKeysA && !t.sectors[j].foundKeyA) || (!dumpKeysA && !t.sectors[j].foundKeyB)) {
 						UpdateSectorStatus(dumpKeysA ? 'A' : 'B', j, 1);
 						// First, try already broken keys
@@ -1146,7 +1148,7 @@ int ReadCard(nfc_device_desc_t *device, std::list<performance> *performanceData,
 				memcpy(mtDump.amb[sectorToFirstBlock(sec)+numberOfBlocks(sec)-1].mbt.abtKeyA, t.sectors[sec].KeyA,6);
 				memcpy(mtDump.amb[sectorToFirstBlock(sec)+numberOfBlocks(sec)-1].mbt.abtKeyB, t.sectors[sec].KeyB,6);
 
-				memcpy(mp.mpa.abtUid,t.ti.nai.abtUid,4);
+				memcpy(mp.mpa.abtUid,t.ti.nti.nai.abtUid,4);
 			}
 
 			// Finally save all keys + data to file
@@ -1207,13 +1209,13 @@ int ReadCard(nfc_device_desc_t *device, std::list<performance> *performanceData,
 		UpdateStatusMessage("Done!");
 		return t.b4K ? 4096 : 1024;
 	}
-	else if (t.ti.nai.abtAtqa[1] == 0x44) {
+	else if (t.ti.nti.nai.abtAtqa[1] == 0x44) {
 		if (buffersize < 64) {
 			UpdateStatusMessage("Buffersize must be at least 64 bytes");
 			return 0;
 		}
 		byte_t *pbtUID;
-		pbtUID = t.ti.nai.abtUid;
+		pbtUID = t.ti.nti.nai.abtUid;
 		sprintf (StatusBuffer, "Card: MIFARE Ultralight card with UID: %02x%02x%02x%02x\n", pbtUID[3], pbtUID[2], pbtUID[1], pbtUID[0]);
 		UpdateStatusMessage(StatusBuffer);
 		mifareul_tag mfult;
@@ -1234,11 +1236,11 @@ int ReadCard(nfc_device_desc_t *device, std::list<performance> *performanceData,
 	}
 }
 
-bool Authenticate(nfc_device_t * pnd, mifare_sector* sector, nfc_target_info_t *t, bool keyA, bool keyB) {
+bool Authenticate(nfc_device_t * pnd, mifare_sector* sector, nfc_target_t *t, bool keyA, bool keyB) {
 	static mifare_param mp;
 	uint8_t block = sectorToFirstBlock(sector->sector)+numberOfBlocks(sector->sector)-1;
 	bool auth = false;
-	memcpy(mp.mpa.abtUid,t->nai.abtUid,4);
+	memcpy(mp.mpa.abtUid,t->nti.nai.abtUid,4);
 
 	if (keyB) {
 		memcpy(mp.mpa.abtKey,sector->KeyB, sizeof(sector->KeyB));
@@ -1256,12 +1258,13 @@ bool Authenticate(nfc_device_t * pnd, mifare_sector* sector, nfc_target_info_t *
 	return auth;
 }
 
-void writeSector(nfc_device_t * pnd, mifare_sector* sector,nfc_target_info_t *t, bool keyA, bool keyB, bool writeKeys, void (*UpdateStatusMessage)(char *status)) {
+void writeSector(nfc_device_t * pnd, mifare_sector* sector,nfc_target_t *t, bool keyA, bool keyB, bool writeKeys, void (*UpdateStatusMessage)(char *status)) {
 	static mifare_param mp;
+	const nfc_modulation_t nm = { NMT_ISO14443A,NBR_106 };
 	char Buffer[150];
 	uint8_t block = sectorToFirstBlock(sector->sector)+numberOfBlocks(sector->sector)-1;
 	memcpy(mp.mpa.abtKey,sector->KeyB, sizeof(sector->KeyB));
-	memcpy(mp.mpa.abtUid,t->nai.abtUid,4);
+	memcpy(mp.mpa.abtUid,t->nti.nai.abtUid,4);
 	if (Authenticate(pnd, sector, t, keyA, keyB)) {
 		int i;
 		for (i=numberOfBlocks(sector->sector)-1;i>=0;i--) {
@@ -1273,7 +1276,7 @@ void writeSector(nfc_device_t * pnd, mifare_sector* sector,nfc_target_info_t *t,
 					UpdateStatusMessage(Buffer);
 				} else {
 					mf_configure(pnd);
-					nfc_initiator_select_passive_target(pnd, NM_ISO14443A_106, NULL, 0, t);
+					nfc_initiator_select_passive_target(pnd, nm, NULL, 0, t);
 					sprintf(Buffer, "Error Writing: Block %02d, type %c, key %012llx", block, 'B', bytes_to_num(sector->KeyB, 6));
 					UpdateStatusMessage(Buffer);
 					break;
@@ -1285,7 +1288,7 @@ void writeSector(nfc_device_t * pnd, mifare_sector* sector,nfc_target_info_t *t,
 		sprintf(Buffer, "Error Writing: Block %02d, type %c, key %012llx :", block, 'B', bytes_to_num(sector->KeyB, 6));
 		UpdateStatusMessage(Buffer);
 		mf_configure(pnd);
-		nfc_initiator_select_passive_target(pnd, NM_ISO14443A_106, NULL, 0, t);
+		nfc_initiator_select_passive_target(pnd, nm, NULL, 0, t);
 	}
 }
 
@@ -1376,11 +1379,11 @@ int WriteCard(nfc_device_desc_t *device, char *keyDir, unsigned char *buffer, in
 	mf_select_tag(r.pdi, &t.ti, UpdateStatusMessage);
 	if (stopreadingcard) return 0;
 	//Check if it's a mifare classic tag
-	if (0 != (t.ti.nai.btSak & 0x08)) {
+	if (0 != (t.ti.nti.nai.btSak & 0x08)) {
 
 		// Save tag uid and info about block size (b4K)
-		t.b4K = (t.ti.nai.abtAtqa[1] == 0x02);
-		t.uid = (uint32_t) bytes_to_num(t.ti.nai.abtUid, 4);
+		t.b4K = (t.ti.nti.nai.abtAtqa[1] == 0x02);
+		t.uid = (uint32_t) bytes_to_num(t.ti.nti.nai.abtUid, 4);
 
 		t.num_blocks = (t.b4K) ? 0xff : 0x3f;
 		t.num_sectors = t.b4K ? NR_TRAILERS_4k : NR_TRAILERS_1k;

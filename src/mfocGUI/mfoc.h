@@ -52,7 +52,7 @@ typedef struct {
 } denonce;                                      // Revealed information about nonce 
  
 typedef struct {
-        nfc_target_info_t  ti;
+        nfc_target_t  ti;
         sector *        sectors;                // Allocate later, we do not know the number of sectors yet
 	sector		e_sector;		// Exploit sector
         uint32_t        num_sectors;

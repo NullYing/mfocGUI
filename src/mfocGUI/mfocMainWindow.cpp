@@ -32,7 +32,7 @@ URL http://www.cosic.esat.kuleuven.be/rfidsec09/Papers/mifare_courtois_rfidsec09
 URL http://www.cs.ru.nl/~petervr/papers/grvw_2009_pickpocket.pdf
 */
 
-#pragma comment (lib, "nfc.lib")
+#pragma comment (lib, "libnfc.lib")
 #pragma comment (lib, "ComCtl32.lib")
 #pragma comment (lib, "gdiplus.lib")
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -580,11 +580,11 @@ void LoadCurrentCard() {
 	nfc_device_t *pnd;
 	size_t  szTargetFound;
 	char StatusBuffer[600];
-
+	const nfc_modulation_t nm = { NMT_ISO14443A,NBR_106 };
 	if (CB_ERR == iSelectedDevice) {
 		SetCardID("Card: No Reader Selected");
 	}	else {
-		nfc_target_info_t anti[1];
+		nfc_target_t anti[1];
 		pnd = nfc_connect (&(pnddDevices[iSelectedDevice]));
 		
 		nfc_initiator_init(pnd);
@@ -602,10 +602,10 @@ void LoadCurrentCard() {
 
 		if (!nfc_configure (pnd, NDO_AUTO_ISO14443_4, true)) { nfc_disconnect(pnd); return; }
 		
-		if (nfc_initiator_list_passive_targets (pnd, NM_ISO14443A_106, anti, 1, &szTargetFound)) {
+		if (nfc_initiator_list_passive_targets (pnd, nm, anti, 1, &szTargetFound)) {
       size_t  n;
       for (n = 0; n < szTargetFound; n++) {
-				switch (anti[n].nai.btSak) {
+				switch (anti[n].nti.nai.btSak) {
 				case 0x04: sprintf(StatusBuffer, "Card: Any MIFARE CL1, uid: "); break;
 				case 0x24: sprintf(StatusBuffer, "Card: MIFARE DESFire (EV1) CL1, uid: "); break;
 				case 0x00: sprintf(StatusBuffer, "Card: MIFARE Ultralight (C) CL2, uid: "); break;
@@ -618,8 +618,8 @@ void LoadCurrentCard() {
 				default:sprintf(StatusBuffer, "Card: Unknown, uid: "); break;
 				}
 				size_t i;
-				for (i = 0; i < anti[n].nai.szUidLen; i++) {
-					sprintf(StatusBuffer,"%s%02x", StatusBuffer, anti[n].nai.abtUid[i]);
+				for (i = 0; i < anti[n].nti.nai.szUidLen; i++) {
+					sprintf(StatusBuffer,"%s%02x", StatusBuffer, anti[n].nti.nai.abtUid[i]);
 				}
 				
         SetCardID(StatusBuffer);
