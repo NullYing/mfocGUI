@@ -197,3 +197,4 @@ FakesAssemblies/
 
 *.VC.db
 *.VC.VC.opendb
+*.dump

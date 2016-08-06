@@ -74,6 +74,7 @@ HWND hReaderL, hReader;
 HWND hReadData, hReadFile, hExport, hWritedata, hWritekeys;
 HWND hDumpToFile, hSelectDirectoryDump, hDumpDirectory;
 HWND hSubmitDump;
+HWND hUseCustomkey, hUseCustomkeyKey;
 HWND hUseHotkey, hUseHotkeyKey, hUseHotkeyLooseFocus;
 HWND hNonOVCard, hOVCard, hOVCardEverything;
 HWND hShowLocations, hShowDuplicates;
@@ -123,6 +124,8 @@ const HMENU hmStatistics =          (HMENU)131;
 const HMENU hmData =                (HMENU)132;
 const HMENU hmSubscriptions =       (HMENU)133;
 
+#define hmUseCustomkey               134
+#define hmUseCustomkeyKey            135
 
 int iHeiValue, iHeiCardID, iHeiStatus;
 int iDumpDirectoryLeft, iDumpDirectoryHeight;
@@ -243,7 +246,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	//Create the Window
-	hwnd = CreateWindowEx(NULL, g_szClassName, "MiFare Offline Cracker GUI + OV Data interperter: V29", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, hInstance, NULL);
+	hwnd = CreateWindowEx(NULL, g_szClassName, "MiFare Offline Cracker GUI + OV Data interperter: V30 Only for pn532", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, hInstance, NULL);
 
 	if(NULL == hwnd) {
 		MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
@@ -764,8 +767,12 @@ void Handle_WM_CREATE(HWND hwnd) {
 	iDumpDirectoryLeft = crTab.left + 6 + checkboxRect.right + 6 + rTMP.Width + 12 + 6;
 	iTMPTop += iButtonHeight + 9;
 	//Line 3
-	rTMP = MeasureString(hdc, false, "You can send in your dumps anonymously for research to ovdumps@huuf.info");
-	hSubmitDump = CreateWindowEx(NULL, WC_STATIC, "You can send in your dumps anonymously for research to ovdumps@huuf.info", WS_CHILD | SS_NOTIFY, crTab.left + 6, iTMPTop + (iButtonHeight / 2) - (rTMP.Height / 2), ceil(rTMP.Width), iButtonHeight, hwnd, hmSubmitDump, ghInstance, NULL);
+
+	checkboxRect = GetRequiredRectForCheckbox(hdc, "Use Custom Key");
+	hUseCustomkey = CreateWindowEx(NULL, WC_BUTTON, "Use Custom Key", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, iButtonHeight, hwnd, (HMENU)hmUseCustomkey, ghInstance, NULL);
+
+	//rTMP = MeasureString(hdc, false, "You can send in your dumps anonymously for research to ovdumps@huuf.info");
+	//hSubmitDump = CreateWindowEx(NULL, WC_STATIC, "You can send in your dumps anonymously for research to ovdumps@huuf.info", WS_CHILD | SS_NOTIFY, crTab.left + 6, iTMPTop + (iButtonHeight / 2) - (rTMP.Height / 2), ceil(rTMP.Width), iButtonHeight, hwnd, hmSubmitDump, ghInstance, NULL);
 	iTMPTop += iButtonHeight + 9;
 
 	//Line 4
@@ -873,11 +880,11 @@ void Handle_WM_CREATE(HWND hwnd) {
 	SendMessage(hStatus, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 	SendMessage(hCardID, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 	SendMessage(hWritedata, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
-	SendMessage(hWritekeys, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+	SendMessage(hWritekeys, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0)); 
 	SendMessage(hUseHotkey, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 	SendMessage(hUseHotkeyKey, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 	SendMessage(hUseHotkeyLooseFocus, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
-
+	SendMessage(hUseCustomkey, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 
 	//Bigger font
 
@@ -958,6 +965,12 @@ void Handle_UsehotkeyChange() {
 	Handle_UsehotkeyKeyChange();
 }
 
+void Handle_UseCustomkeyChange() {
+	int iEna = SendMessage(hUseCustomkey, BM_GETCHECK, NULL, NULL) == BST_CHECKED;
+	EnableWindow(hUseCustomkey, iEna);
+	//Handle_UseCustomkeyChange();
+}
+
 //! Handle the checking and unchecking of the Dump To File checkbox
 void Handle_DumpToFileChange() {
 	int iEna = SendMessage(hDumpToFile, BM_GETCHECK, NULL, NULL) == BST_CHECKED;
@@ -980,6 +993,7 @@ void Handle_UseKeyBChange() {
 void Update_All_Controls() {
 	Handle_TypeofcardChange();
 	Handle_DumpToFileChange();
+	Handle_UseCustomkeyChange();
 	Handle_UsehotkeyChange();
 	Handle_UsehotkeyKeyChange();
 	Handle_UseKeyAChange();

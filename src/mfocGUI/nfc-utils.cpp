@@ -171,12 +171,12 @@ parse_device_desc (int argc, const char *argv[], size_t * szFound)
         strncpy (buffer, argv[++arg], 256);
 
         // Driver.
-        pndd->pcDriver = (char *) malloc (256);
+        //pndd->pcDriver = (char *) malloc (256);
         strcpy (pndd->pcDriver, strtok (buffer, ":"));
 
         // Port.
-        pndd->pcPort = (char *) malloc (256);
-        strcpy (pndd->pcPort, strtok (NULL, ":"));
+        //pndd->acPort = (char *) malloc (256);
+        strcpy (pndd->acPort, strtok (NULL, ":"));
 
         // Speed.
         sscanf (strtok (NULL, ":"), "%u", &pndd->uiSpeed);
