@@ -92,31 +92,31 @@ const HMENU hmStatus =              (HMENU)102;
 const HMENU hmValue =               (HMENU)103;
 const HMENU hmMainTabControl =      (HMENU)104;
 
-const HMENU hmOverlay =             (HMENU)105;
-const HMENU hmReaderL =             (HMENU)106;
-const HMENU hmReader =              (HMENU)107;
-const HMENU hmReadData =            (HMENU)108;
-const HMENU hmReadFile =            (HMENU)109;
-const HMENU hmExport =              (HMENU)110;
-const HMENU hmWritedata =           (HMENU)111;
-const HMENU hmWritekeys =           (HMENU)112;
-const HMENU hmDumpToFile =          (HMENU)113;
-const HMENU hmSelectDirectoryDump = (HMENU)114;
-const HMENU hmDumpDirectory =       (HMENU)115;
-const HMENU hmSubmitDump =          (HMENU)116;
-const HMENU hmNonOVCard =           (HMENU)117;
-const HMENU hmOVCard =              (HMENU)118;
-const HMENU hmOVCardEverything =    (HMENU)119;
-const HMENU hmShowLocations =       (HMENU)120;
-const HMENU hmShowDuplicates =      (HMENU)121;
-const HMENU hmNumberOfSetsL =       (HMENU)122;
-const HMENU hmNumberOfSets =        (HMENU)123;
-const HMENU hmUseKeyA =             (HMENU)124;
-const HMENU hmSectors =             (HMENU)125;
-const HMENU hmUseKeyB =             (HMENU)126;
-const HMENU hmSectorsB =            (HMENU)127;
-const HMENU hmUseHotkey =           (HMENU)128;
-const HMENU hmUseHotkeyKey =        (HMENU)129;
+const HMENU hmOverlay = (HMENU)105;
+const HMENU hmReaderL = (HMENU)106;
+const HMENU hmReader = (HMENU)107;
+#define hmReadData                  108
+#define hmReadFile                  109
+#define hmExport                    110
+#define hmWritedata                 111
+const HMENU hmWritekeys = (HMENU)112;
+#define hmDumpToFile                113
+#define hmSelectDirectoryDump       114
+const HMENU hmDumpDirectory = (HMENU)115;
+const HMENU hmSubmitDump = (HMENU)116;
+#define hmNonOVCard                 117
+#define hmOVCard                    118
+#define hmOVCardEverything          119
+#define hmShowLocations             120
+#define hmShowDuplicates            121
+const HMENU hmNumberOfSetsL = (HMENU)122;
+const HMENU hmNumberOfSets = (HMENU)123;
+#define hmUseKeyA                   124
+const HMENU hmSectors = (HMENU)125;
+#define hmUseKeyB                   126
+const HMENU hmSectorsB = (HMENU)127;
+#define hmUseHotkey                 128
+#define hmUseHotkeyKey              129
 const HMENU hmUseHotkeyLooseFocus = (HMENU)130;
 
 const HMENU hmStatistics =          (HMENU)131;
@@ -719,12 +719,12 @@ void Handle_WM_CREATE(HWND hwnd) {
 
 	//Tab 1
 	hOverlay = CreateWindowEx(NULL, WC_STATIC, "", WS_CHILD | WS_VISIBLE, crTab.left, crTab.top, crTab.right - crTab.left, crTab.bottom - crTab.top, hwnd, hmOverlay, ghInstance, NULL);
-	
+
 	//Line 0
 	iTMPTop = crTab.top + 6;
-	rTMP = MeasureString(hdc,false, "Reader:");
+	rTMP = MeasureString(hdc, false, "Reader:");
 	hReader = CreateWindowEx(NULL, WC_COMBOBOX, "", WS_BORDER | WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST, crTab.left + 6 + ceil(rTMP.Width), iTMPTop, 203, 0, hwnd, hmReader, ghInstance, NULL);
-	
+
 	int iItemHeight = SendMessage(hReader, CB_GETITEMHEIGHT, 0, 0);
 	iItemHeight += (GetSystemMetrics(8) * 2);
 	SetWindowPos(hReader, NULL, 0, 0, 203, iItemHeight, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
@@ -733,73 +733,73 @@ void Handle_WM_CREATE(HWND hwnd) {
 	iTMPTop += iItemHeight + 9;
 
 	//Line 1
-	rTMPMax = MeasureString(hdc,false, "Read data (Reader)");
-	rTMP = MeasureString(hdc,false, "Read data (File)");
+	rTMPMax = MeasureString(hdc, false, "Read data (Reader)");
+	rTMP = MeasureString(hdc, false, "Read data (File)");
 	if (rTMP.Width > rTMPMax.Width) rTMPMax.Width = rTMP.Width;
 	if (rTMP.Height > rTMPMax.Height) rTMPMax.Height = rTMP.Height;
-	rTMP = MeasureString(hdc,false, "Export (OV)");
+	rTMP = MeasureString(hdc, false, "Export (OV)");
 	if (rTMP.Width > rTMPMax.Width) rTMPMax.Width = rTMP.Width;
 	if (rTMP.Height > rTMPMax.Height) rTMPMax.Height = rTMP.Height;
-	rTMP = MeasureString(hdc,false, "Write data (Reader)");
+	rTMP = MeasureString(hdc, false, "Write data (Reader)");
 	if (rTMP.Width > rTMPMax.Width) rTMPMax.Width = rTMP.Width;
 	if (rTMP.Height > rTMPMax.Height) rTMPMax.Height = rTMP.Height;
 	int iButtonHeight = ceil(rTMPMax.Height) + 9;
 	int iButtonWidth = ceil(rTMPMax.Width) + 12;
 
-	hReadData = CreateWindowEx(NULL, WC_BUTTON, "&Read data (Reader)", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6, iTMPTop, iButtonWidth, iButtonHeight, hwnd, hmReadData, ghInstance, NULL);
-	hReadFile = CreateWindowEx(NULL, WC_BUTTON, "Read data (&File)", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6 + iButtonWidth + 6, iTMPTop, iButtonWidth, iButtonHeight, hwnd, hmReadFile, ghInstance, NULL);
-	hExport = CreateWindowEx(NULL, WC_BUTTON, "&Export (OV)", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6 + iButtonWidth + 6 + iButtonWidth + 6, iTMPTop, iButtonWidth, iButtonHeight, hwnd, hmExport, ghInstance, NULL);
-	hWritedata = CreateWindowEx(NULL, WC_BUTTON, "&Write data (Reader)", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6 + iButtonWidth + 6 + iButtonWidth + 6 + iButtonWidth + 6, iTMPTop, iButtonWidth, iButtonHeight, hwnd, hmWritedata, ghInstance, NULL);
+	hReadData = CreateWindowEx(NULL, WC_BUTTON, "&Read data (Reader)", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6, iTMPTop, iButtonWidth, iButtonHeight, hwnd, (HMENU)hmReadData, ghInstance, NULL);
+	hReadFile = CreateWindowEx(NULL, WC_BUTTON, "Read data (&File)", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6 + iButtonWidth + 6, iTMPTop, iButtonWidth, iButtonHeight, hwnd, (HMENU)hmReadFile, ghInstance, NULL);
+	hExport = CreateWindowEx(NULL, WC_BUTTON, "&Export (OV)", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6 + iButtonWidth + 6 + iButtonWidth + 6, iTMPTop, iButtonWidth, iButtonHeight, hwnd, (HMENU)hmExport, ghInstance, NULL);
+	hWritedata = CreateWindowEx(NULL, WC_BUTTON, "&Write data (Reader)", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6 + iButtonWidth + 6 + iButtonWidth + 6 + iButtonWidth + 6, iTMPTop, iButtonWidth, iButtonHeight, hwnd, (HMENU)hmWritedata, ghInstance, NULL);
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "Write keys");
 	hWritekeys = CreateWindowEx(NULL, WC_BUTTON, "Write keys", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6 + iButtonWidth + 6 + iButtonWidth + 6 + iButtonWidth + 6 + iButtonWidth + 6, iTMPTop, checkboxRect.right + checkboxRect.left, iButtonHeight, hwnd, hmWritekeys, ghInstance, NULL);
 	iTMPTop += iButtonHeight + 9;
 	//Line 2
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "Dump to file");
-	hDumpToFile = CreateWindowEx(NULL, WC_BUTTON, "Dump to file", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, iButtonHeight, hwnd, hmDumpToFile, ghInstance, NULL);
-	rTMP = MeasureString(hdc,false, "Select Directory");
-	hSelectDirectoryDump = CreateWindowEx(NULL, WC_BUTTON, "Select Directory", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6 + checkboxRect.right + 6, iTMPTop, rTMP.Width + 12, iButtonHeight, hwnd, hmSelectDirectoryDump, ghInstance, NULL);
-	RectF rTMP2 = MeasureString(hdc,false, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	hDumpToFile = CreateWindowEx(NULL, WC_BUTTON, "Dump to file", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, iButtonHeight, hwnd, (HMENU)hmDumpToFile, ghInstance, NULL);
+	rTMP = MeasureString(hdc, false, "Select Directory");
+	hSelectDirectoryDump = CreateWindowEx(NULL, WC_BUTTON, "Select Directory", WS_CHILD | BS_PUSHBUTTON, crTab.left + 6 + checkboxRect.right + 6, iTMPTop, rTMP.Width + 12, iButtonHeight, hwnd, (HMENU)hmSelectDirectoryDump, ghInstance, NULL);
+	RectF rTMP2 = MeasureString(hdc, false, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	hDumpDirectory = CreateWindowEx(NULL, WC_STATIC, "CURRENT DIRECTORY", WS_CHILD, crTab.left + 6 + checkboxRect.right + 6 + rTMP.Width + 12 + 6, iTMPTop + (iButtonHeight / 2) - (rTMP2.Height / 2), 542, ceil(rTMP2.Height), hwnd, hmDumpDirectory, ghInstance, NULL);
 	iDumpDirectoryHeight = iTMPTop + (iButtonHeight / 2) - (rTMP2.Height / 2);
 	iDumpDirectoryLeft = crTab.left + 6 + checkboxRect.right + 6 + rTMP.Width + 12 + 6;
 	iTMPTop += iButtonHeight + 9;
 	//Line 3
-	rTMP = MeasureString(hdc,false, "You can send in your dumps anonymously for research to ovdumps@huuf.info");
+	rTMP = MeasureString(hdc, false, "You can send in your dumps anonymously for research to ovdumps@huuf.info");
 	hSubmitDump = CreateWindowEx(NULL, WC_STATIC, "You can send in your dumps anonymously for research to ovdumps@huuf.info", WS_CHILD | SS_NOTIFY, crTab.left + 6, iTMPTop + (iButtonHeight / 2) - (rTMP.Height / 2), ceil(rTMP.Width), iButtonHeight, hwnd, hmSubmitDump, ghInstance, NULL);
 	iTMPTop += iButtonHeight + 9;
 
 	//Line 4
-	rTMP = MeasureString(hdc,false, "Loose Focus");
+	rTMP = MeasureString(hdc, false, "Loose Focus");
 	iButtonHeight = ceil(rTMPMax.Height) + 9;
 	iButtonWidth = ceil(rTMPMax.Width) + 12;
 
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "Use hotkey");
-	hUseHotkey = CreateWindowEx(NULL, WC_BUTTON, "Use hotkey", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop + (iButtonHeight / 2) - (checkboxRect.bottom / 2), checkboxRect.right, checkboxRect.bottom, hwnd, hmUseHotkey, ghInstance, NULL);
+	hUseHotkey = CreateWindowEx(NULL, WC_BUTTON, "Use hotkey", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop + (iButtonHeight / 2) - (checkboxRect.bottom / 2), checkboxRect.right, checkboxRect.bottom, hwnd, (HMENU)hmUseHotkey, ghInstance, NULL);
 	iTMPLeft = crTab.left + 6 + checkboxRect.right + 6;
-	hUseHotkeyKey = CreateWindowEx(NULL, HOTKEY_CLASS, "", WS_VISIBLE | WS_CHILD | WS_DISABLED, iTMPLeft, iTMPTop + (iButtonHeight / 2) - 10, 203, 20, hwnd, hmUseHotkeyKey, ghInstance, NULL);
+	hUseHotkeyKey = CreateWindowEx(NULL, HOTKEY_CLASS, "", WS_VISIBLE | WS_CHILD | WS_DISABLED, iTMPLeft, iTMPTop + (iButtonHeight / 2) - 10, 203, 20, hwnd, (HMENU)hmUseHotkeyKey, ghInstance, NULL);
 	iTMPLeft += 203 + 6;
 	hUseHotkeyLooseFocus = CreateWindowEx(NULL, WC_BUTTON, "&Loose Focus", WS_CHILD | BS_PUSHBUTTON, iTMPLeft, iTMPTop, iButtonWidth, iButtonHeight, hwnd, hmUseHotkeyLooseFocus, ghInstance, NULL);
 	iTMPTop += iButtonHeight + 9;
 
 	//Line 5
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "Non-OV Card");
-	hNonOVCard = CreateWindowEx(NULL, WC_BUTTON, "Non-OV Card", WS_CHILD | BS_AUTORADIOBUTTON, crTab.left + 6, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, hmNonOVCard, ghInstance, NULL);
+	hNonOVCard = CreateWindowEx(NULL, WC_BUTTON, "Non-OV Card", WS_CHILD | BS_AUTORADIOBUTTON, crTab.left + 6, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, (HMENU)hmNonOVCard, ghInstance, NULL);
 	iTMPLeft = crTab.left + 6 + checkboxRect.right + 6;
 
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "OV Card");
-	hOVCard = CreateWindowEx(NULL, WC_BUTTON, "OV Card", WS_CHILD | BS_AUTORADIOBUTTON, iTMPLeft, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, hmOVCard, ghInstance, NULL);
+	hOVCard = CreateWindowEx(NULL, WC_BUTTON, "OV Card", WS_CHILD | BS_AUTORADIOBUTTON, iTMPLeft, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, (HMENU)hmOVCard, ghInstance, NULL);
 	iTMPLeft += checkboxRect.right + 6;
 
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "OV Card - Read Everything");
-	hOVCardEverything = CreateWindowEx(NULL, WC_BUTTON, "OV Card - Read Everything", WS_CHILD | BS_AUTORADIOBUTTON, iTMPLeft, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, hmOVCardEverything, ghInstance, NULL);
+	hOVCardEverything = CreateWindowEx(NULL, WC_BUTTON, "OV Card - Read Everything", WS_CHILD | BS_AUTORADIOBUTTON, iTMPLeft, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, (HMENU)hmOVCardEverything, ghInstance, NULL);
 	iTMPTop += checkboxRect.bottom + 9;
 
 	//Line 6
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "Show location");
-	hShowLocations = CreateWindowEx(NULL, WC_BUTTON, "Show location", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, hmShowLocations, ghInstance, NULL);
+	hShowLocations = CreateWindowEx(NULL, WC_BUTTON, "Show location", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, (HMENU)hmShowLocations, ghInstance, NULL);
 	iTMPLeft = crTab.left + 6 + checkboxRect.right + 6;
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "Show duplicates");
-	hShowDuplicates = CreateWindowEx(NULL, WC_BUTTON, "Show duplicates", BS_AUTOCHECKBOX | WS_CHILD, iTMPLeft, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, hmShowDuplicates, ghInstance, NULL);
+	hShowDuplicates = CreateWindowEx(NULL, WC_BUTTON, "Show duplicates", BS_AUTOCHECKBOX | WS_CHILD, iTMPLeft, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, (HMENU)hmShowDuplicates, ghInstance, NULL);
 	iTMPTop += checkboxRect.bottom + 9;
 	//Line 7
 	rTMP = MeasureString(hdc, false, "Sets: 999");
@@ -809,7 +809,7 @@ void Handle_WM_CREATE(HWND hwnd) {
 	iTMPTop += 34 + 9;
 	//Line 8
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "Use Key A");
-	hUseKeyA = CreateWindowEx(NULL, WC_BUTTON, "Use Key A", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, hmUseKeyA, ghInstance, NULL);
+	hUseKeyA = CreateWindowEx(NULL, WC_BUTTON, "Use Key A", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, (HMENU)hmUseKeyA, ghInstance, NULL);
 	iTMPTop += checkboxRect.bottom + 9;
 	rTMP = MeasureString(hdc, false, "Sectors A:");
 	hSectors = CreateWindowEx(NULL, WC_STATIC, "Sectors A:", WS_CHILD, crTab.left + 6, iTMPTop, ceil(rTMP.Width), ceil(rTMP.Height), hwnd, hmSectors, ghInstance, NULL);
@@ -821,7 +821,7 @@ void Handle_WM_CREATE(HWND hwnd) {
 	iTMPTop += 46;
 	//Line 9
 	checkboxRect = GetRequiredRectForCheckbox(hdc, "Use Key B");
-	hUseKeyB = CreateWindowEx(NULL, WC_BUTTON, "Use Key B", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, hmUseKeyB, ghInstance, NULL);
+	hUseKeyB = CreateWindowEx(NULL, WC_BUTTON, "Use Key B", BS_AUTOCHECKBOX | WS_CHILD, crTab.left + 6, iTMPTop, checkboxRect.right, checkboxRect.bottom, hwnd, (HMENU)hmUseKeyB, ghInstance, NULL);
 	iTMPTop += checkboxRect.bottom + 9;
 	rTMP = MeasureString(hdc, false, "Sectors B:");
 	hSectorsB = CreateWindowEx(NULL, WC_STATIC, "Sectors B:", WS_CHILD, crTab.left + 6, iTMPTop, ceil(rTMP.Width), ceil(rTMP.Height), hwnd, hmSectorsB, ghInstance, NULL);
@@ -830,7 +830,7 @@ void Handle_WM_CREATE(HWND hwnd) {
 		hSector = CreateWindowEx(NULL, WC_BUTTON, "", BS_AUTO3STATE | WS_CHILD | WS_DISABLED, iTMPLeft + (21 * (i % 20)), iTMPTop + ((i / 20) * 20), 15, 14, hwnd, (HMENU)(300 + i), ghInstance, NULL);
 		SendMessage(hSector, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 	}
-	
+
 	//Tab 2
 	hStatistics = CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "You first have to read a card to see statistics.", WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL, crTab.left, crTab.top, crTab.right - crTab.left, crTab.bottom - crTab.top, hwnd, hmStatistics, ghInstance, NULL);
 	//Tab 3
@@ -877,16 +877,16 @@ void Handle_WM_CREATE(HWND hwnd) {
 	SendMessage(hUseHotkey, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 	SendMessage(hUseHotkeyKey, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 	SendMessage(hUseHotkeyLooseFocus, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
-	
+
 
 	//Bigger font
-	
+
 	SendMessage(hValue, WM_SETFONT, (WPARAM)hFontBig, MAKELPARAM(TRUE, 0));
 
-	
+
 	//Trackbar settings
-	SendMessage(hNumberOfSets, TBM_SETRANGE, (WPARAM) TRUE, (LPARAM) MAKELONG(1, 8));
-	SendMessage(hNumberOfSets, TBM_SETPAGESIZE, 0, (LPARAM) 1);
+	SendMessage(hNumberOfSets, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG(1, 8));
+	SendMessage(hNumberOfSets, TBM_SETPAGESIZE, 0, (LPARAM)1);
 	SendMessage(hNumberOfSets, TBM_SETPOS, TRUE, (LPARAM)2);
 	sprintf(BUFFER, "Sets: %i", 2);
 	SendMessage(hNumberOfSetsL, WM_SETTEXT, 0, (LPARAM)&BUFFER);
