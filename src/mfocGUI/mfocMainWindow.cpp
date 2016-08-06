@@ -35,6 +35,11 @@ URL http://www.cs.ru.nl/~petervr/papers/grvw_2009_pickpocket.pdf
 #pragma comment (lib, "libnfc.lib")
 #pragma comment (lib, "ComCtl32.lib")
 #pragma comment (lib, "gdiplus.lib")
+#pragma comment(lib,  "Gdi32.lib")
+#pragma comment(lib,  "shell32.lib")
+#pragma comment(lib,  "comdlg32.lib")
+#pragma comment(lib,  "Ole32.lib")
+#pragma comment (lib, "User32.lib")
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include <stdio.h>
