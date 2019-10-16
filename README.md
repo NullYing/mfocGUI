@@ -35,11 +35,3 @@ https://www.lastfighting.com/archives/8
 
 ----------
 
-#### <i class="icon-upload"></i> About Me
-
-```
-Copyleft © 2016 NULLYING
-Author:白月秋见心
-http://www.lastfighting.com/
-Email: ourweijiang@gmail.com
-```
