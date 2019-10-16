@@ -32,9 +32,3 @@ mfocGUI是mfoc的Windows版本，主要用途为Mifare卡的破解，饭卡，�
 
 ----------
 
-#### <i class="icon-upload"></i> About Me
-
-Copyleft © 2016 NULLYING
-  	Author:白月秋见心
-http://www.lastfighting.com/
-Email: ourweijiang@gmail.com
