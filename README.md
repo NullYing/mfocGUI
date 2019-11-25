@@ -2,7 +2,7 @@ mfocGUI-For_PN532
 ===================
 
 ```
-This is only for pn532 version,and I had tested
+This is only for pn532
 mfocGUI是mfoc的Windows版本，主要用途为Mifare卡的破解，饭卡，热水卡，等等。。。
 
 https://www.lastfighting.com/archives/8
@@ -29,9 +29,7 @@ https://www.lastfighting.com/archives/8
 
 > **未完成的开发:**
 
-> - 由于libnfc版本过老，更新需要修改所有libnfc api函数。该版本libnfc为1.5.1，未编译进去acr122驱动，故只支持pn532
-> - 更新mfoc源码
-> - 自定义密钥
+> - 由于libnfc版本过老，更新需要修改所有libnfc api函数。该版本libnfc为1.5.1，未编译进去acr122驱动（没设备），故只支持pn532
 
 ----------
 
