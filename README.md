@@ -20,16 +20,16 @@ https://www.lastfighting.com/archives/8
 
 #### <i class="icon-refresh">Change LOG
 
-> **本次更新**
+ **本次更新**
 
-> - 升级libnfc为1.5.1，更新了部分api函数
-> - 更新附带的libnfc文件，1.7.1版本
-> - 修改默认key
-> - 没去折腾acr122的驱动
+ - 升级libnfc为1.5.1，更新了部分api函数
+ - 更新附带的libnfc文件，1.7.1版本
+ - 修改默认key
+ - 没去折腾acr122的驱动
 
-> **未完成的开发:**
+ **未完成的开发:**
 
-> - 由于libnfc版本过老，更新需要修改所有libnfc api函数。该版本libnfc为1.5.1，未编译进去acr122驱动（没设备），故只支持pn532
+ - 由于libnfc版本过老，更新需要修改所有libnfc api函数。该版本libnfc为1.5.1，未编译进去acr122驱动（没设备），故只支持pn532
 
 ----------
 
